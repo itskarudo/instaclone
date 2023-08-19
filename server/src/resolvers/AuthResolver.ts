@@ -4,7 +4,8 @@ import { Arg, Authorized, Ctx, Field, InputType, Mutation, Query, Resolver } fro
 import argon2 from "argon2";
 import appDataSource from "../appDataSource";
 import { generateTokens, validateRefreshToken } from "../utils/tokens";
-import AppContext from "src/AppContext";
+import AppContext from "../AppContext";
+import AppErrorCode from "../utils/ErrorCode";
 
 @InputType()
 class RegisterInput implements Partial<User> {
@@ -67,12 +68,12 @@ class AuthResolver {
       .getOne();
 
     if (!user)
-      throw new Error("INVALID_LOGIN_CREDENTIALS");
+      throw new Error(AppErrorCode.INVALID_LOGIN_CREDENTIALS);
 
     const isValid = await argon2.verify(user.password, password);
 
     if (!isValid)
-      throw new Error("INVALID_LOGIN_CREDENTIALS");
+      throw new Error(AppErrorCode.INVALID_LOGIN_CREDENTIALS);
 
     const {accessToken, refreshToken} = generateTokens(user.id, user.tokenVersion);
 
