@@ -1,8 +1,10 @@
 import { IsEmail, MinLength } from "class-validator";
 import User from "../models/User";
-import { Arg, Field, InputType, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, Ctx, Field, InputType, Mutation, Query, Resolver } from "type-graphql";
 import argon2 from "argon2";
 import appDataSource from "../appDataSource";
+import { generateTokens, validateRefreshToken } from "../utils/tokens";
+import AppContext from "src/AppContext";
 
 @InputType()
 class RegisterInput implements Partial<User> {
@@ -24,9 +26,62 @@ class RegisterInput implements Partial<User> {
 
 @Resolver()
 class AuthResolver {
+
+  @Authorized()
   @Query(() => String)
   async test() {
     return "test";
+  }
+
+  @Mutation(() => String, {nullable: true})
+  async refresh(@Ctx() ctx: AppContext): Promise<string | null>
+  {
+    if (!ctx.refreshToken) return null;
+
+    const token = validateRefreshToken(ctx.refreshToken);
+
+    if (!token) return null;
+
+    const user = await appDataSource.getRepository(User).findOneBy({
+      id: token.userId
+    })
+
+    if (!user) return null;
+
+    if (user.tokenVersion > token.tokenVersion) return null;
+
+    const {accessToken, refreshToken} = generateTokens(user.id, user.tokenVersion);
+
+    ctx.res.cookie("RefreshToken", refreshToken, {
+      httpOnly: true
+    });
+
+    return accessToken;
+  }
+
+  @Mutation(() => String)
+  async login(@Ctx() ctx: AppContext, @Arg("usernameOrEmail") usernameOrEmail: string, @Arg("password") password: string) {
+
+    const user = await appDataSource.getRepository(User).createQueryBuilder("user")
+      .where("user.username = :usernameOrEmail OR user.email = :usernameOrEmail", {usernameOrEmail})
+      .getOne();
+
+    if (!user)
+      throw new Error("INVALID_LOGIN_CREDENTIALS");
+
+    const isValid = await argon2.verify(user.password, password);
+
+    if (!isValid)
+      throw new Error("INVALID_LOGIN_CREDENTIALS");
+
+    const {accessToken, refreshToken} = generateTokens(user.id, user.tokenVersion);
+
+    ctx.res.cookie('RefreshToken', refreshToken, {
+      httpOnly: true
+    });
+
+    return accessToken;
+
   }
 
   @Mutation(() => User)

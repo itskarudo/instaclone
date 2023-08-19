@@ -29,6 +29,9 @@ class User {
   @Column()
   password: string;
 
+  @Column({default: 0})
+  tokenVersion: number;
+
   @Field()
   @CreateDateColumn()
   createdAt: Date;

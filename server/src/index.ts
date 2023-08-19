@@ -7,6 +7,9 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import cors from "cors";
 import appDataSource from "./appDataSource";
+import AppContext from "./AppContext";
+import cookieParser from "cookie-parser";
+import AuthChecker from "./utils/AuthChecker";
 
 dotenv.config();
 
@@ -22,23 +25,34 @@ const main = async () => {
 
   const app = express();
 
+  app.use(cookieParser());
   app.use(express.json());
 
-  app.use(cors());
+  app.use(cors({
+    credentials: true,
+    origin: "http://localhost:3000"
+  }));
 
-  const server = new ApolloServer({
+  const server = new ApolloServer<AppContext>({
     schema: await buildSchema({
       resolvers: [AuthResolver],
       validate: {
         forbidUnknownValues: false,
       },
+      authChecker: AuthChecker
     }),
     formatError: (err) => err,
   });
 
   await server.start();
 
-  app.use("/graphql", expressMiddleware(server));
+  app.use("/graphql", expressMiddleware(server, {
+    context: async ({req, res}): Promise<AppContext> => ({
+      res,
+      accessToken: req.headers.authorization?.split(' ')[1],
+      refreshToken: req.cookies['RefreshToken']
+    })
+  }));
 
   app.listen(process.env.PORT, () => {
     console.log(`> Server running on port ${process.env.PORT}`);
