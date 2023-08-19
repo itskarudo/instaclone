@@ -94,10 +94,6 @@ const Login = () => {
               Sign up
             </button>
           </form>
-          <hr className="border-b-[1px] border-slate-200 border-solid my-3" />
-          <Link className="text-blue-900 text-xs" href="/reset-password">
-            Forgot password?
-          </Link>
         </div>
         <div className="border-[1px] border-slate-300 border-solid px-10 py-5 text-center">
           <p className="text-sm">
