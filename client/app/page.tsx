@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useForm, SubmitHandler } from "react-hook-form";
 import getUrqlClient from "@/utils/getUrqlClient";
 import { graphql } from "@/generated";
+import { useRouter } from "next/navigation";
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
 
@@ -15,11 +16,12 @@ interface Inputs {
 }
 
 const Login = () => {
+  const router = useRouter();
   const client = getUrqlClient();
 
   const query = graphql(`
-    query Test {
-      test
+    mutation Login($usernameOrEmail: String!, $password: String!) {
+      login(usernameOrEmail: $usernameOrEmail, password: $password)
     }
   `);
 
@@ -32,8 +34,19 @@ const Login = () => {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
-    const { data } = await client.query(query, {});
-    console.log(data);
+    const { data, error } = await client.mutation(query, {
+      usernameOrEmail: inputs.usernameOrEmail,
+      password: inputs.password,
+    });
+
+    if (error || !data) {
+      console.error(error);
+      return;
+    }
+
+    localStorage.setItem("access_token", data.login);
+
+    router.push("/home");
   };
 
   return (
