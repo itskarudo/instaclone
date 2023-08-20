@@ -1,12 +1,15 @@
 import { graphql } from "@/generated";
 import { authExchange } from "@urql/exchange-auth";
 import { registerUrql } from "@urql/next/rsc";
-import { cacheExchange, createClient, fetchExchange, gql } from "urql";
+import { cacheExchange, createClient, fetchExchange } from "@urql/core";
+import { SERVER_BASE_URL } from "./paths";
 
 const makeClient = () => {
 
+  const isServer = typeof window === 'undefined'
+
   return createClient({
-    url: "http://localhost:5000/graphql",
+    url: `${SERVER_BASE_URL}/graphql`,
     fetchOptions: {
       credentials: "include"
     },
@@ -15,6 +18,7 @@ const makeClient = () => {
 
       return {
         addAuthToOperation(operation) {
+          if (isServer) return operation;
           const accessToken = localStorage.getItem("access_token");
 
           if (!accessToken) return operation;
@@ -24,7 +28,7 @@ const makeClient = () => {
           })
         },
         didAuthError(error, _operation) {
-          return error.graphQLErrors.some(e => e.message.startsWith('Access denied!'))
+          return !isServer && error.graphQLErrors.some(e => e.message.startsWith('Access denied!'))
         },
         async refreshAuth() {
 
