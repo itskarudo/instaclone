@@ -4,10 +4,9 @@ import Image from "next/image";
 import { Pacifico } from "next/font/google";
 import Link from "next/link";
 import { useForm, SubmitHandler } from "react-hook-form";
-import getUrqlClient from "@/utils/getUrqlClient";
-import { graphql } from "@/generated";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import authContext from "@/contexts/authContext";
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
 
@@ -18,15 +17,9 @@ interface Inputs {
 
 const Login = () => {
   const router = useRouter();
-  const client = getUrqlClient();
+  const auth = useContext(authContext);
 
   const [passwordHidden, setPasswordHidden] = useState(true);
-
-  const query = graphql(`
-    mutation Login($usernameOrEmail: String!, $password: String!) {
-      login(usernameOrEmail: $usernameOrEmail, password: $password)
-    }
-  `);
 
   const {
     register,
@@ -39,19 +32,8 @@ const Login = () => {
 
   const password = watch("password");
 
-  const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
-    const { data, error } = await client.mutation(query, {
-      usernameOrEmail: inputs.usernameOrEmail,
-      password: inputs.password,
-    });
-
-    if (error || !data) {
-      console.error(error);
-      return;
-    }
-
-    localStorage.setItem("access_token", data.login);
-
+  const onSubmit: SubmitHandler<Inputs> = (inputs) => {
+    auth.login(inputs.usernameOrEmail, inputs.password);
     router.push("/home");
   };
 
@@ -66,6 +48,7 @@ const Login = () => {
             Instaclone
           </h1>
           <form onSubmit={handleSubmit(onSubmit)}>
+            <div>{auth.username}</div>
             <div>
               <input
                 className="border-[1px] border-slate-300 border-solid p-2 text-xs w-full mb-3 focus:border-slate-400 focus:outline-none rounded"

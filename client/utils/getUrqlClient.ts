@@ -11,9 +11,9 @@ const makeClient = () => {
   return createClient({
     url: `${SERVER_BASE_URL}/graphql`,
     fetchOptions: {
-      credentials: "include"
+      credentials: "include",
+      cache: "no-store"
     },
-    requestPolicy: "network-only",
     exchanges: [cacheExchange, authExchange(async (utils) => {
 
       return {

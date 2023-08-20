@@ -1,4 +1,5 @@
 "use client";
+import { AuthContextProvider } from "@/contexts/authContext";
 import getUrqlClient from "@/utils/getUrqlClient";
 import { UrqlProvider, ssrExchange } from "@urql/next";
 

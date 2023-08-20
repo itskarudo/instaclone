@@ -26,7 +26,7 @@ const Login = () => {
   const mutation = graphql(`
     mutation Register($data: RegisterInput!) {
       register(data: $data) {
-        id
+        username
       }
     }
   `);

@@ -10,6 +10,7 @@ import { PostsQuery } from "@/generated/graphql";
 import { postImageURL, profileImageURL } from "@/utils/paths";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Link from "next/link";
 
 dayjs.extend(relativeTime);
 
@@ -29,7 +30,9 @@ const Post: React.FC<Props> = ({ post }) => {
             height={35}
             className="rounded-full"
           />
-          <span className="text-sm font-bold">{post.user.username}</span>
+          <Link href={post.user.username}>
+            <span className="text-sm font-bold">{post.user.username}</span>
+          </Link>
           <span className="text-sm text-gray-500">
             • {dayjs(post.createdAt).fromNow()}
           </span>
