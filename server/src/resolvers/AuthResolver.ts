@@ -38,14 +38,14 @@ class AuthResolver {
     if (!token) return null;
 
     const user = await appDataSource.getRepository(User).findOneBy({
-      id: token.userId
+      username: token.username
     })
 
     if (!user) return null;
 
     if (user.tokenVersion > token.tokenVersion) return null;
 
-    const {accessToken, refreshToken} = generateTokens(user.id, user.tokenVersion);
+    const {accessToken, refreshToken} = generateTokens(user.username, user.tokenVersion);
 
     ctx.res.cookie("RefreshToken", refreshToken, {
       httpOnly: true
@@ -69,7 +69,7 @@ class AuthResolver {
     if (!isValid)
       throw new Error(AppErrorCode.INVALID_LOGIN_CREDENTIALS);
 
-    const {accessToken, refreshToken} = generateTokens(user.id, user.tokenVersion);
+    const {accessToken, refreshToken} = generateTokens(user.username, user.tokenVersion);
 
     ctx.res.cookie('RefreshToken', refreshToken, {
       httpOnly: true

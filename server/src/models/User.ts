@@ -1,10 +1,10 @@
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ObjectType } from "type-graphql";
 import {
   Column,
   CreateDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
 import Post from "./Post";
@@ -12,12 +12,9 @@ import Post from "./Post";
 @ObjectType()
 @Entity()
 class User {
-  @Field(() => ID)
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
 
   @Field()
-  @Column({ unique: true })
+  @PrimaryColumn({ unique: true })
   username: string;
 
   @Field()
@@ -27,6 +24,10 @@ class User {
   @Field({ nullable: true })
   @Column({ nullable: true })
   fullName?: string;
+
+  @Field({nullable: true})
+  @Column({nullable: true})
+  bio: string;
 
   @Field({nullable: true})
   @Column({nullable: true})

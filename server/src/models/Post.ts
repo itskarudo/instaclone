@@ -18,11 +18,11 @@ class Post {
   photoURL: string;
 
   @Field(() => User)
-  @ManyToOne(() => User, (user) => user.posts, {onDelete: "CASCADE"})
+  @ManyToOne(() => User, (user) => user.posts, {onDelete: "CASCADE" })
   user: User;
 
   @RelationId((post: Post) => post.user)
-  userId: string;
+  userUsername: string;
 
   @Field(() => Date)
   @CreateDateColumn()

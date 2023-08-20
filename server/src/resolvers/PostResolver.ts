@@ -13,11 +13,11 @@ class PostResolver {
   @Query(() => [Post])
   async posts(@Ctx() ctx: AppContext): Promise<Post[]> {
 
-    const {userId} = decodeAccessToken(ctx.accessToken!);
+    const {username} = decodeAccessToken(ctx.accessToken!);
 
     const posts = await appDataSource.getRepository(Post)
       .createQueryBuilder("post")
-      .where("post.userId = :userId", {userId})
+      .where("post.userUsername = :username", {username})
       .getMany();
       
     return posts;
@@ -29,7 +29,7 @@ class PostResolver {
 
     const user = await appDataSource.getRepository(User)
       .createQueryBuilder("user")
-      .where("user.id = :userId", {userId: post.userId})
+      .where("user.username = :username", {username: post.userUsername})
       .getOne();
 
     if (!user) throw new Error(AppErrorCode.INTERNAL_SERVER_ERROR);

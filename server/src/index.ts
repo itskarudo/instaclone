@@ -12,6 +12,7 @@ import cookieParser from "cookie-parser";
 import AuthChecker from "./utils/AuthChecker";
 import path from "path";
 import PostResolver from "./resolvers/PostResolver";
+import UserResolver from "./resolvers/UserResolver";
 
 dotenv.config();
 
@@ -41,7 +42,7 @@ const main = async () => {
 
   const server = new ApolloServer<AppContext>({
     schema: await buildSchema({
-      resolvers: [AuthResolver, PostResolver],
+      resolvers: [AuthResolver, PostResolver, UserResolver],
       validate: {
         forbidUnknownValues: false,
       },
