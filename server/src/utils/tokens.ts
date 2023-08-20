@@ -27,3 +27,7 @@ export const validateRefreshToken = (token: string) => {
     return null;
   }
 }
+
+export const decodeAccessToken = (token: string) => {
+    return jwt.decode(token) as {userId: string};
+}

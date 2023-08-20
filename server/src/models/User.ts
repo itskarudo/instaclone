@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import Post from "./Post";
 
 @ObjectType()
 @Entity()
@@ -26,11 +28,19 @@ class User {
   @Column({ nullable: true })
   fullName?: string;
 
+  @Field({nullable: true})
+  @Column({nullable: true})
+  profilePhotoURL: string;
+
   @Column()
   password: string;
 
   @Column({default: 0})
   tokenVersion: number;
+
+  @Field(() => [Post])
+  @OneToMany(() => Post, post => post.user)
+  posts: Post[]
 
   @Field()
   @CreateDateColumn()

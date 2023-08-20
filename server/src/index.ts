@@ -10,6 +10,8 @@ import appDataSource from "./appDataSource";
 import AppContext from "./AppContext";
 import cookieParser from "cookie-parser";
 import AuthChecker from "./utils/AuthChecker";
+import path from "path";
+import PostResolver from "./resolvers/PostResolver";
 
 dotenv.config();
 
@@ -28,6 +30,10 @@ const main = async () => {
   app.use(cookieParser());
   app.use(express.json());
 
+  app.use('/uploads', express.static(
+    path.join(__dirname, '../uploads/')
+  ))
+
   app.use(cors({
     credentials: true,
     origin: "http://localhost:3000"
@@ -35,7 +41,7 @@ const main = async () => {
 
   const server = new ApolloServer<AppContext>({
     schema: await buildSchema({
-      resolvers: [AuthResolver],
+      resolvers: [AuthResolver, PostResolver],
       validate: {
         forbidUnknownValues: false,
       },

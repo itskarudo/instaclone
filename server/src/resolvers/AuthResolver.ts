@@ -1,6 +1,6 @@
 import { IsEmail, MinLength } from "class-validator";
 import User from "../models/User";
-import { Arg, Authorized, Ctx, Field, InputType, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Field, InputType, Mutation, Resolver } from "type-graphql";
 import argon2 from "argon2";
 import appDataSource from "../appDataSource";
 import { generateTokens, validateRefreshToken } from "../utils/tokens";
@@ -27,12 +27,6 @@ class RegisterInput implements Partial<User> {
 
 @Resolver()
 class AuthResolver {
-
-  @Authorized()
-  @Query(() => String)
-  async test() {
-    return "test";
-  }
 
   @Mutation(() => String, {nullable: true})
   async refresh(@Ctx() ctx: AppContext): Promise<string | null>
