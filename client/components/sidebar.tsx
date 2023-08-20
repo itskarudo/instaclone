@@ -79,7 +79,13 @@ const Sidebar = () => {
                 ) : (
                   <item.inactiveIcon className="text-3xl" />
                 )}
-                <span className="font-bold text-md">{item.title}</span>
+                <span
+                  className={`text-md ${
+                    item.href == pathname ? "font-bold" : ""
+                  }`}
+                >
+                  {item.title}
+                </span>
               </li>
             </Link>
           ))}
