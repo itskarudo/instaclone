@@ -48,7 +48,6 @@ const Login = () => {
             Instaclone
           </h1>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div>{auth.username}</div>
             <div>
               <input
                 className="border-[1px] border-slate-300 border-solid p-2 text-xs w-full mb-3 focus:border-slate-400 focus:outline-none rounded"
