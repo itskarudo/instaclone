@@ -17,7 +17,7 @@ const ProfileInfo: React.FC<Props> = ({ username, fullName, bio }) => {
 
   return (
     <div className="w-2/3">
-      <div className="flex w-2/3 gap-4 items-center">
+      <div className="flex gap-4 items-center">
         <span className="text-xl">{username}</span>
         {ownProfile ? (
           <>
