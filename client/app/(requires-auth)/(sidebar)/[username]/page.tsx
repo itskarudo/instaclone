@@ -16,7 +16,7 @@ const getProfile = async (username: string): Promise<UserQuery["user"]> => {
         profilePhotoURL
         posts {
           id
-          photoURL
+          photoURLs
           caption
         }
       }
@@ -56,7 +56,7 @@ const Profile = async ({ params }: { params: { username: string } }) => {
           {profile?.posts.map((post) => (
             <div className="aspect-square" key={post.id}>
               <Image
-                src={postImageURL(post.photoURL)}
+                src={postImageURL(post.photoURLs[0])}
                 alt={post.caption}
                 width={400}
                 height={400}

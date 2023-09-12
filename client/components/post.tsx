@@ -7,7 +7,7 @@ import {
 } from "react-icons/hi2";
 import Image from "next/image";
 import { PostsQuery } from "@/generated/graphql";
-import { postImageURL, profileImageURL } from "@/utils/paths";
+import { profileImageURL } from "@/utils/paths";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
@@ -43,7 +43,7 @@ const Post: React.FC<Props> = ({ post }) => {
       </div>
       <div className="mt-4 mb-3 rounded overflow-hidden border-[1px] border-gray-100 border-solid">
         <Image
-          src={postImageURL(post.photoURL)}
+          src={post.photoURLs[0]}
           alt="post image"
           width={500}
           height={500}

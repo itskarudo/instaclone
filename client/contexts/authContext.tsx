@@ -4,13 +4,20 @@ import getUrqlClient from "@/utils/getUrqlClient";
 import { createContext, useEffect, useState } from "react";
 import jwtDecode from "jwt-decode";
 
+interface AccessTokenPayload {
+  username: string;
+  profilePicURL: string | null;
+}
+
 interface AuthContextType {
   username: string | null;
+  profilePicURL: string | null;
   login: (usernameOrEmail: string, password: string) => void | Promise<void>;
 }
 
 const authContext = createContext<AuthContextType>({
   username: null,
+  profilePicURL: null,
   login: () => {},
 });
 
@@ -25,14 +32,16 @@ export const AuthContextProvider: React.FC<React.PropsWithChildren> = ({
 }) => {
   const client = getUrqlClient();
   const [username, setUsername] = useState<string | null>(null);
+  const [profilePicURL, setProfilePicURL] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const { username } = jwtDecode(token) as { username: string };
+    const { username, profilePicURL } = jwtDecode(token) as AccessTokenPayload;
 
     setUsername(username);
+    setProfilePicURL(profilePicURL);
   });
 
   const login = async (usernameOrEmail: string, password: string) => {
@@ -46,9 +55,10 @@ export const AuthContextProvider: React.FC<React.PropsWithChildren> = ({
       return;
     }
 
-    const token = jwtDecode(data.login) as { username: string };
+    const token = jwtDecode(data.login) as AccessTokenPayload;
 
     setUsername(token.username);
+    setProfilePicURL(token.profilePicURL);
 
     localStorage.setItem("access_token", data.login);
   };
@@ -57,6 +67,7 @@ export const AuthContextProvider: React.FC<React.PropsWithChildren> = ({
     <authContext.Provider
       value={{
         username,
+        profilePicURL,
         login,
       }}
     >
