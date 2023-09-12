@@ -22,6 +22,7 @@ class UserResolver {
       .getRepository(Post)
       .createQueryBuilder("post")
       .where("post.ownerUsername = :username", { username: user.username })
+      .orderBy("post.createdAt", "DESC")
       .getMany();
 
     return posts;

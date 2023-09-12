@@ -2,7 +2,7 @@ import ProfileInfo from "@/components/profile-info";
 import { graphql } from "@/generated";
 import { UserQuery } from "@/generated/graphql";
 import getUrqlClient from "@/utils/getUrqlClient";
-import { postImageURL, profileImageURL } from "@/utils/paths";
+import { profileImageURL } from "@/utils/paths";
 import Image from "next/image";
 
 const getProfile = async (username: string): Promise<UserQuery["user"]> => {
@@ -56,7 +56,7 @@ const Profile = async ({ params }: { params: { username: string } }) => {
           {profile?.posts.map((post) => (
             <div className="aspect-square" key={post.id}>
               <Image
-                src={postImageURL(post.photoURLs[0])}
+                src={post.photoURLs[0]}
                 alt={post.caption}
                 width={400}
                 height={400}
