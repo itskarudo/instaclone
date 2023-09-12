@@ -5,25 +5,24 @@ import { Arg, FieldResolver, Query, Resolver, Root } from "type-graphql";
 
 @Resolver(() => User)
 class UserResolver {
-
-  @Query(() => User, {nullable: true})
+  @Query(() => User, { nullable: true })
   async user(@Arg("username") username: string): Promise<User | null> {
+    const user = await appDataSource
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .where("user.username = :username", { username })
+      .getOne();
 
-    const user = await appDataSource.getRepository(User)
-    .createQueryBuilder("user")
-    .where("user.username = :username", {username})
-    .getOne();
-
-    return user
+    return user;
   }
 
   @FieldResolver()
   async posts(@Root() user: User): Promise<Post[]> {
-
-    const posts = await appDataSource.getRepository(Post)
-    .createQueryBuilder("post")
-    .where("post.userUsername = :username", {username: user.username})
-    .getMany();
+    const posts = await appDataSource
+      .getRepository(Post)
+      .createQueryBuilder("post")
+      .where("post.ownerUsername = :username", { username: user.username })
+      .getMany();
 
     return posts;
   }

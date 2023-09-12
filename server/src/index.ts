@@ -31,14 +31,14 @@ const main = async () => {
   app.use(cookieParser());
   app.use(express.json());
 
-  app.use('/uploads', express.static(
-    path.join(__dirname, '../uploads/')
-  ))
+  app.use("/uploads", express.static(path.join(__dirname, "../uploads/")));
 
-  app.use(cors({
-    credentials: true,
-    origin: "http://localhost:3000"
-  }));
+  app.use(
+    cors({
+      credentials: true,
+      origin: "http://localhost:3000",
+    }),
+  );
 
   const server = new ApolloServer<AppContext>({
     schema: await buildSchema({
@@ -46,20 +46,23 @@ const main = async () => {
       validate: {
         forbidUnknownValues: false,
       },
-      authChecker: AuthChecker
+      authChecker: AuthChecker,
     }),
     formatError: (err) => err,
   });
 
   await server.start();
 
-  app.use("/graphql", expressMiddleware(server, {
-    context: async ({req, res}): Promise<AppContext> => ({
-      res,
-      accessToken: req.headers.authorization?.split(' ')[1],
-      refreshToken: req.cookies['RefreshToken']
-    })
-  }));
+  app.use(
+    "/graphql",
+    expressMiddleware(server, {
+      context: async ({ req, res }): Promise<AppContext> => ({
+        res,
+        accessToken: req.headers.authorization?.split(" ")[1],
+        refreshToken: req.cookies["RefreshToken"],
+      }),
+    }),
+  );
 
   app.listen(process.env.PORT, () => {
     console.log(`> Server running on port ${process.env.PORT}`);

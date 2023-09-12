@@ -1,5 +1,13 @@
 import { Field, ID, ObjectType } from "type-graphql";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import User from "./User";
 
 @ObjectType()
@@ -13,16 +21,19 @@ class Post {
   @Column()
   caption: string;
 
-  @Field()
-  @Column()
-  photoURL: string;
+  @Field(() => [String])
+  @Column("text", {
+    array: true,
+  })
+  photoURLs: string[];
 
   @Field(() => User)
-  @ManyToOne(() => User, (user) => user.posts, {onDelete: "CASCADE" })
+  @ManyToOne(() => User, (user) => user.posts, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "ownerUsername" })
   user: User;
 
-  @RelationId((post: Post) => post.user)
-  userUsername: string;
+  @Column()
+  ownerUsername: string;
 
   @Field(() => Date)
   @CreateDateColumn()
@@ -33,4 +44,4 @@ class Post {
   updatedAt: Date;
 }
 
-export default Post
+export default Post;

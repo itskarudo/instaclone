@@ -3,7 +3,7 @@ import User from "../models/User";
 import { Arg, Ctx, Field, InputType, Mutation, Resolver } from "type-graphql";
 import argon2 from "argon2";
 import appDataSource from "../appDataSource";
-import { generateTokens, validateRefreshToken } from "../utils/tokens";
+import { generateTokens, decodeRefreshToken } from "../utils/tokens";
 import AppContext from "../AppContext";
 import AppErrorCode from "../utils/ErrorCode";
 
@@ -27,56 +27,67 @@ class RegisterInput implements Partial<User> {
 
 @Resolver()
 class AuthResolver {
-
-  @Mutation(() => String, {nullable: true})
-  async refresh(@Ctx() ctx: AppContext): Promise<string | null>
-  {
+  @Mutation(() => String, { nullable: true })
+  async refresh(@Ctx() ctx: AppContext): Promise<string | null> {
     if (!ctx.refreshToken) return null;
 
-    const token = validateRefreshToken(ctx.refreshToken);
+    const token = decodeRefreshToken(ctx.refreshToken);
 
     if (!token) return null;
 
     const user = await appDataSource.getRepository(User).findOneBy({
-      username: token.username
-    })
+      username: token.username,
+    });
 
     if (!user) return null;
 
     if (user.tokenVersion > token.tokenVersion) return null;
 
-    const {accessToken, refreshToken} = generateTokens(user.username, user.tokenVersion);
+    const { accessToken, refreshToken } = generateTokens(
+      user.username,
+      user.profilePhotoURL,
+      user.tokenVersion,
+    );
 
     ctx.res.cookie("RefreshToken", refreshToken, {
-      httpOnly: true
+      httpOnly: true,
     });
 
     return accessToken;
   }
 
   @Mutation(() => String)
-  async login(@Ctx() ctx: AppContext, @Arg("usernameOrEmail") usernameOrEmail: string, @Arg("password") password: string) {
-
-    const user = await appDataSource.getRepository(User).createQueryBuilder("user")
-      .where("user.username = :usernameOrEmail OR user.email = :usernameOrEmail", {usernameOrEmail})
+  async login(
+    @Ctx() ctx: AppContext,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Arg("password") password: string,
+  ) {
+    const user = await appDataSource
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .where(
+        "user.username = :usernameOrEmail OR user.email = :usernameOrEmail",
+        { usernameOrEmail },
+      )
       .getOne();
 
-    if (!user)
-      throw new Error(AppErrorCode.INVALID_LOGIN_CREDENTIALS);
+    if (!user) throw new Error(AppErrorCode.INVALID_LOGIN_CREDENTIALS);
 
     const isValid = await argon2.verify(user.password, password);
 
-    if (!isValid)
-      throw new Error(AppErrorCode.INVALID_LOGIN_CREDENTIALS);
+    if (!isValid) throw new Error(AppErrorCode.INVALID_LOGIN_CREDENTIALS);
 
-    const {accessToken, refreshToken} = generateTokens(user.username, user.tokenVersion);
+    const { accessToken, refreshToken } = generateTokens(
+      user.username,
+      user.profilePhotoURL,
+      user.tokenVersion,
+    );
 
-    ctx.res.cookie('RefreshToken', refreshToken, {
-      httpOnly: true
+    ctx.res.cookie("RefreshToken", refreshToken, {
+      httpOnly: true,
     });
 
     return accessToken;
-
   }
 
   @Mutation(() => User)

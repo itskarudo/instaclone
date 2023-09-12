@@ -1,16 +1,20 @@
 import AppContext from "src/AppContext";
 import { AuthCheckerInterface, ResolverData } from "type-graphql";
-import {validateAccessToken} from "../utils/tokens"
+import { decodeAccessToken } from "../utils/tokens";
 
 class AuthChecker implements AuthCheckerInterface<AppContext> {
-  async check({context}: ResolverData<AppContext>, _: string[]): Promise<boolean> {
+  async check(
+    { context }: ResolverData<AppContext>,
+    _: string[],
+  ): Promise<boolean> {
+    if (!context.accessToken) return false;
 
-    if (!context.accessToken) return false
+    const payload = decodeAccessToken(context.accessToken);
+    if (!payload) return false;
 
-    if (!validateAccessToken(context.accessToken)) return false;
+    context.tokenPayload = payload;
 
     return true;
-
   }
 }
 
