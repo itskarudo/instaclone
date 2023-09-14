@@ -2,15 +2,13 @@
 
 import authContext from "@/contexts/authContext";
 import { graphql } from "@/generated";
+import { UserQuery } from "@/generated/graphql";
 import getUrqlClient from "@/utils/getUrqlClient";
 import { useContext, useEffect, useState } from "react";
 import { HiEllipsisHorizontal } from "react-icons/hi2";
-import { useQuery } from "urql";
 
 interface Props {
-  username: string;
-  fullName: string;
-  bio: string;
+  profile: UserQuery["user"] & { username: string };
 }
 
 const fetchIsFollowing = graphql(`
@@ -31,18 +29,18 @@ const unfollowMutation = graphql(`
   }
 `);
 
-const ProfileInfo: React.FC<Props> = ({ username, fullName, bio }) => {
+const ProfileInfo: React.FC<Props> = ({ profile }) => {
   const client = getUrqlClient();
   const auth = useContext(authContext);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const ownProfile = username === auth.username;
+  const ownProfile = profile.username === auth.username;
 
   useEffect(() => {
     (async () => {
       if (auth.username !== null && !ownProfile) {
         const { data, error } = await client.query(fetchIsFollowing, {
-          username,
+          username: profile.username,
         });
         if (error || !data) return;
         setIsFollowing(data.following);
@@ -51,19 +49,19 @@ const ProfileInfo: React.FC<Props> = ({ username, fullName, bio }) => {
   }, [auth, ownProfile]);
 
   const follow = async () => {
-    await client.mutation(followMutation, { username });
+    await client.mutation(followMutation, { username: profile.username });
     setIsFollowing(true);
   };
 
   const unfollow = async () => {
-    await client.mutation(unfollowMutation, { username });
+    await client.mutation(unfollowMutation, { username: profile.username });
     setIsFollowing(false);
   };
 
   return (
     <div className="w-2/3">
       <div className="flex gap-4 items-center">
-        <span className="text-xl">{username}</span>
+        <span className="text-xl">{profile.username}</span>
         {ownProfile ? (
           <>
             <button className="bg-gray-200  text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-300">
@@ -104,18 +102,18 @@ const ProfileInfo: React.FC<Props> = ({ username, fullName, bio }) => {
       </div>
       <div className="flex gap-12 mt-6">
         <div>
-          <span className="font-bold">20</span> posts
+          <span className="font-bold">{profile.posts.length}</span> posts
         </div>
         <div>
-          <span className="font-bold">30</span> followers
+          <span className="font-bold">{profile.followersCount}</span> followers
         </div>
         <div>
-          <span className="font-bold">50</span> following
+          <span className="font-bold">{profile.followingCount}</span> following
         </div>
       </div>
       <div className="mt-4">
-        <h3 className="font-bold text-sm">{fullName}</h3>
-        <p className="text-sm">{bio}</p>
+        <h3 className="font-bold text-sm">{profile.fullName ?? ""}</h3>
+        <p className="text-sm">{profile.bio ?? ""}</p>
       </div>
     </div>
   );
