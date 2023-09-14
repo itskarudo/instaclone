@@ -43,11 +43,20 @@ class User {
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
 
+  @Field()
+  postsCount: number;
+
   @OneToMany(() => Follow, (follow) => follow.user)
   followers: Follow[];
 
   @OneToMany(() => Follow, (follow) => follow.follower)
   following: Follow[];
+
+  @Field()
+  followersCount: number;
+
+  @Field()
+  followingCount: number;
 
   @Field()
   @CreateDateColumn()

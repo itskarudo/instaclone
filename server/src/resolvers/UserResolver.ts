@@ -2,6 +2,7 @@ import Post from "../models/Post";
 import appDataSource from "../appDataSource";
 import User from "../models/User";
 import { Arg, FieldResolver, Query, Resolver, Root } from "type-graphql";
+import Follow from "../models/Follow";
 
 @Resolver(() => User)
 class UserResolver {
@@ -26,6 +27,33 @@ class UserResolver {
       .getMany();
 
     return posts;
+  }
+
+  @FieldResolver()
+  async postsCount(@Root() user: User): Promise<number> {
+    return await appDataSource.getRepository(Post).count({
+      where: {
+        ownerUsername: user.username,
+      },
+    });
+  }
+
+  @FieldResolver()
+  async followersCount(@Root() user: User): Promise<number> {
+    return await appDataSource.getRepository(Follow).count({
+      where: {
+        userId: user.username,
+      },
+    });
+  }
+
+  @FieldResolver()
+  async followingCount(@Root() user: User): Promise<number> {
+    return await appDataSource.getRepository(Follow).count({
+      where: {
+        followerId: user.username,
+      },
+    });
   }
 }
 
