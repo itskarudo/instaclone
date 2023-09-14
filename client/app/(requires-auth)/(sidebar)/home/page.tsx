@@ -5,8 +5,8 @@ import { useQuery } from "urql";
 
 const Home = () => {
   const query = graphql(`
-    query Posts {
-      posts {
+    query Timeline {
+      timeline {
         id
         caption
         photoURLs
@@ -27,7 +27,7 @@ const Home = () => {
         <div className="w-2/3">
           <div>STORIES</div>
           <div className="flex flex-col  items-center mt-5 gap-5">
-            {data?.posts.map((post) => <Post key={post.id} post={post} />)}
+            {data?.timeline.map((post) => <Post key={post.id} post={post} />)}
           </div>
         </div>
         <div className="w-1/3">stuff here</div>

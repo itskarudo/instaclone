@@ -1,8 +1,11 @@
 "use client";
 
 import authContext from "@/contexts/authContext";
-import { useContext } from "react";
+import { graphql } from "@/generated";
+import getUrqlClient from "@/utils/getUrqlClient";
+import { useContext, useEffect, useState } from "react";
 import { HiEllipsisHorizontal } from "react-icons/hi2";
+import { useQuery } from "urql";
 
 interface Props {
   username: string;
@@ -10,10 +13,52 @@ interface Props {
   bio: string;
 }
 
+const fetchIsFollowing = graphql(`
+  query Following($username: String!) {
+    following(username: $username)
+  }
+`);
+
+const followMutation = graphql(`
+  mutation Follow($username: String!) {
+    follow(username: $username)
+  }
+`);
+
+const unfollowMutation = graphql(`
+  mutation Unfollow($username: String!) {
+    unfollow(username: $username)
+  }
+`);
+
 const ProfileInfo: React.FC<Props> = ({ username, fullName, bio }) => {
+  const client = getUrqlClient();
   const auth = useContext(authContext);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const ownProfile = username === auth.username;
+
+  useEffect(() => {
+    (async () => {
+      if (auth.username !== null && !ownProfile) {
+        const { data, error } = await client.query(fetchIsFollowing, {
+          username,
+        });
+        if (error || !data) return;
+        setIsFollowing(data.following);
+      }
+    })();
+  }, [auth, ownProfile]);
+
+  const follow = async () => {
+    await client.mutation(followMutation, { username });
+    setIsFollowing(true);
+  };
+
+  const unfollow = async () => {
+    await client.mutation(unfollowMutation, { username });
+    setIsFollowing(false);
+  };
 
   return (
     <div className="w-2/3">
@@ -33,10 +78,22 @@ const ProfileInfo: React.FC<Props> = ({ username, fullName, bio }) => {
           </>
         ) : (
           <>
-            <button className="bg-blue-500 text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-blue-600">
-              Follow
-            </button>
-            <button className="bg-gray-200  text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-300">
+            {isFollowing ? (
+              <button
+                className="bg-gray-200 text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-300"
+                onClick={unfollow}
+              >
+                Following
+              </button>
+            ) : (
+              <button
+                className="bg-blue-500 text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-blue-600"
+                onClick={follow}
+              >
+                Follow
+              </button>
+            )}
+            <button className="bg-gray-200 text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-300">
               Message
             </button>
             <button>
