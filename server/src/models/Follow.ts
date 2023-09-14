@@ -1,31 +1,27 @@
 import {
-  Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
 import User from "./User";
 
 @Entity()
 class Follow {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
-
   @ManyToOne(() => User, (user) => user.followers, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   user: User;
 
-  @Column()
+  @PrimaryColumn()
   userId: string;
 
   @ManyToOne(() => User, (user) => user.following, { onDelete: "CASCADE" })
   @JoinColumn({ name: "followerId" })
   follower: User;
 
-  @Column()
+  @PrimaryColumn()
   followerId: string;
 
   @CreateDateColumn()
