@@ -13,6 +13,7 @@ import AuthChecker from "./utils/AuthChecker";
 import path from "path";
 import PostResolver from "./resolvers/PostResolver";
 import UserResolver from "./resolvers/UserResolver";
+import FollowResolver from "./resolvers/FollowResolver";
 
 dotenv.config();
 
@@ -36,13 +37,13 @@ const main = async () => {
   app.use(
     cors({
       credentials: true,
-      origin: "http://localhost:3000",
+      origin: ["http://localhost:3000", "https://studio.apollographql.com"],
     }),
   );
 
   const server = new ApolloServer<AppContext>({
     schema: await buildSchema({
-      resolvers: [AuthResolver, PostResolver, UserResolver],
+      resolvers: [AuthResolver, PostResolver, UserResolver, FollowResolver],
       validate: {
         forbidUnknownValues: false,
       },

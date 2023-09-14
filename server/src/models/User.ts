@@ -8,11 +8,11 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import Post from "./Post";
+import Follow from "./Follow";
 
 @ObjectType()
 @Entity()
 class User {
-
   @Field()
   @PrimaryColumn({ unique: true })
   username: string;
@@ -25,23 +25,29 @@ class User {
   @Column({ nullable: true })
   fullName?: string;
 
-  @Field({nullable: true})
-  @Column({nullable: true})
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   bio: string;
 
-  @Field({nullable: true})
-  @Column({nullable: true})
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   profilePhotoURL: string;
 
   @Column()
   password: string;
 
-  @Column({default: 0})
+  @Column({ default: 0 })
   tokenVersion: number;
 
   @Field(() => [Post])
-  @OneToMany(() => Post, post => post.user)
-  posts: Post[]
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
+
+  @OneToMany(() => Follow, (follow) => follow.user)
+  followers: Follow[];
+
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  following: Follow[];
 
   @Field()
   @CreateDateColumn()

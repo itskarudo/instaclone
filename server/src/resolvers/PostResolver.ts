@@ -13,17 +13,23 @@ import {
 } from "type-graphql";
 import User from "../models/User";
 import AppErrorCode from "../utils/ErrorCode";
+import Follow from "../models/Follow";
 
 @Resolver(() => Post)
 class PostResolver {
   @Authorized()
   @Query(() => [Post])
-  async posts(@Ctx() ctx: AppContext): Promise<Post[]> {
+  async timeline(@Ctx() ctx: AppContext): Promise<Post[]> {
     const posts = await appDataSource
       .getRepository(Post)
       .createQueryBuilder("post")
-      .where("post.ownerUsername = :username", {
-        username: ctx.tokenPayload!.username,
+      .innerJoinAndSelect(
+        Follow,
+        "follow",
+        "post.ownerUsername = follow.userId",
+      )
+      .where("follow.followerId = :followerId", {
+        followerId: ctx.tokenPayload!.username,
       })
       .orderBy("post.createdAt", "DESC")
       .getMany();
